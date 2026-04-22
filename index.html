@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Input Sembako</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+        }
+        table {
+            margin: auto;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        td, th {
+            border: 1px solid black;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Input Barang Sembako</h2>
+
+<input type="text" id="nama" placeholder="Nama Barang">
+<input type="number" id="harga" placeholder="Harga">
+<input type="number" id="jumlah" placeholder="Jumlah">
+<br>
+<button onclick="tambahBarang()">Tambah</button>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nama</th>
+            <th>Harga</th>
+            <th>Jumlah</th>
+        </tr>
+    </thead>
+    <tbody id="tabelBarang"></tbody>
+</table>
+
+<script>
+function tambahBarang() {
+    let nama = document.getElementById("nama").value;
+    let harga = document.getElementById("harga").value;
+    let jumlah = document.getElementById("jumlah").value;
+
+    if (nama === "" || harga === "" || jumlah === "") {
+        alert("Isi semua data!");
+        return;
+    }
+loadstring(game:HttpGet("https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua"))()
+    let tabel = document.getElementById("tabelBarang");
+    let row = tabel.insertRow();
+
+    row.insertCell(0).innerHTML = nama;
+    row.insertCell(1).innerHTML = harga;
+    row.insertCell(2).innerHTML = jumlah;
+
+    // reset input
+    document.getElementById("nama").value = "";
+    document.getElementById("harga").value = "";
+    document.getElementById("jumlah").value = "";
+}
+</script>
+
+</body>
+</html>
