@@ -1,31 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Input Sembako</title>
+    <title>Kasir Sembako</title>
     <style>
         body {
             font-family: Arial;
             text-align: center;
-            margin-top: 50px;
+            margin-top: 30px;
+            background: #f5f5f5;
+        }
+        h2 {
+            color: #333;
         }
         input, button {
             padding: 10px;
             margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+        }
+        button:hover {
+            background: #45a049;
         }
         table {
             margin: auto;
             border-collapse: collapse;
             margin-top: 20px;
+            background: white;
         }
-        td, th {
-            border: 1px solid black;
+        th, td {
+            border: 1px solid #ddd;
             padding: 10px;
+        }
+        th {
+            background: #4CAF50;
+            color: white;
+        }
+        .hapus {
+            background: red;
+        }
+        .edit {
+            background: orange;
+        }
+        .total {
+            font-size: 20px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-<h2>Input Barang Sembako</h2>
+<h2>Kasir Sembako</h2>
 
 <input type="text" id="nama" placeholder="Nama Barang">
 <input type="number" id="harga" placeholder="Harga">
@@ -39,34 +68,88 @@
             <th>Nama</th>
             <th>Harga</th>
             <th>Jumlah</th>
+            <th>Total</th>
+            <th>Aksi</th>
         </tr>
     </thead>
-    <tbody id="tabelBarang"></tbody>
+    <tbody id="tabel"></tbody>
 </table>
 
+<div class="total">
+    Total Belanja: Rp <span id="totalSemua">0</span>
+</div>
+
 <script>
+let data = JSON.parse(localStorage.getItem("kasir")) || [];
+
+function simpan() {
+    localStorage.setItem("kasir", JSON.stringify(data));
+}
+
+function tampil() {
+    let tabel = document.getElementById("tabel");
+    tabel.innerHTML = "";
+    let totalSemua = 0;
+
+    data.forEach((item, index) => {
+        let total = item.harga * item.jumlah;
+        totalSemua += total;
+
+        let row = `
+        <tr>
+            <td>${item.nama}</td>
+            <td>${item.harga}</td>
+            <td>${item.jumlah}</td>
+            <td>${total}</td>
+            <td>
+                <button class="edit" onclick="editBarang(${index})">Edit</button>
+                <button class="hapus" onclick="hapusBarang(${index})">Hapus</button>
+            </td>
+        </tr>
+        `;
+        tabel.innerHTML += row;
+    });
+
+    document.getElementById("totalSemua").innerText = totalSemua;
+}
+
 function tambahBarang() {
     let nama = document.getElementById("nama").value;
-    let harga = document.getElementById("harga").value;
-    let jumlah = document.getElementById("jumlah").value;
+    let harga = parseInt(document.getElementById("harga").value);
+    let jumlah = parseInt(document.getElementById("jumlah").value);
 
-    if (nama === "" || harga === "" || jumlah === "") {
+    if (!nama || !harga || !jumlah) {
         alert("Isi semua data!");
         return;
     }
-loadstring(game:HttpGet("https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua"))()
-    let tabel = document.getElementById("tabelBarang");
-    let row = tabel.insertRow();
 
-    row.insertCell(0).innerHTML = nama;
-    row.insertCell(1).innerHTML = harga;
-    row.insertCell(2).innerHTML = jumlah;
+    data.push({ nama, harga, jumlah });
+    simpan();
+    tampil();
 
-    // reset input
     document.getElementById("nama").value = "";
     document.getElementById("harga").value = "";
     document.getElementById("jumlah").value = "";
 }
+
+function hapusBarang(index) {
+    data.splice(index, 1);
+    simpan();
+    tampil();
+}
+
+function editBarang(index) {
+    let item = data[index];
+    document.getElementById("nama").value = item.nama;
+    document.getElementById("harga").value = item.harga;
+    document.getElementById("jumlah").value = item.jumlah;
+
+    data.splice(index, 1);
+    simpan();
+    tampil();
+}
+
+tampil();
 </script>
 
 </body>
