@@ -2,68 +2,95 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Kasir Sembako</title>
+<title>Kasir Minimalis Pro</title>
 
 <style>
 body {
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: white;
+  font-family: Arial;
+  background: #f9fafb;
+  color: #111;
   text-align: center;
 }
 
+/* CONTAINER */
 .container {
-  width: 350px;
+  width: 420px;
   margin: auto;
-  background: #1e293b;
+  margin-top: 20px;
+  background: white;
   padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 0 20px #000;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  animation: fade 0.6s;
 }
 
-h1 {
-  color: #38bdf8;
+@keyframes fade {
+  from {opacity:0; transform: translateY(20px);}
+  to {opacity:1;}
 }
 
-select, input {
-  width: 90%;
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
+}
+
+.card {
+  background: #f1f5f9;
   padding: 10px;
-  margin: 10px;
   border-radius: 10px;
-  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  background: #e2e8f0;
+}
+
+/* LIST */
+.item {
+  background: #f1f5f9;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  animation: slide 0.3s;
+}
+
+@keyframes slide {
+  from {opacity:0; transform: translateX(-10px);}
+  to {opacity:1;}
 }
 
 button {
-  padding: 10px 20px;
-  border-radius: 10px;
-  border: none;
-  background: #22c55e;
+  background: black;
   color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
   cursor: pointer;
 }
 
-button:hover {
-  background: #16a34a;
-}
-
-.list {
-  text-align: left;
-  margin-top: 20px;
-}
-
-.item {
-  background: #334155;
-  padding: 10px;
-  margin: 5px;
-  border-radius: 10px;
-  display: flex;
-  justify-content: space-between;
+input {
+  width: 90%;
+  padding: 8px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
 
 .total {
-  margin-top: 20px;
-  font-size: 20px;
-  color: #facc15;
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.kembali {
+  margin-top: 10px;
+  font-weight: bold;
 }
 </style>
 </head>
@@ -71,71 +98,90 @@ button:hover {
 <body>
 
 <div class="container">
-<h1>Kasir Sembako</h1>
+<h2>Kasir Sembako</h2>
 
-<select id="barang" onchange="updateHarga()">
-  <option value="">-- Pilih Barang --</option>
-  <option value="3000">Indomie</option>
-  <option value="3200">Supermie</option>
-  <option value="5000">Popmie</option>
-  <option value="13000">Beras (1kg)</option>
-  <option value="1500">Masako</option>
-  <option value="2000">Ladaku</option>
-  <option value="3500">Milo Sachet</option>
-</select>
+<!-- LIST BARANG -->
+<div class="grid" id="produk"></div>
 
-<input type="number" id="harga" placeholder="Harga" readonly>
-<input type="number" id="jumlah" placeholder="Jumlah">
-
-<button onclick="tambah()">Tambah</button>
-
-<div class="list" id="list"></div>
+<h3>Keranjang</h3>
+<div id="list"></div>
 
 <div class="total">
 Total: Rp <span id="total">0</span>
 </div>
+
+<input type="number" id="bayar" placeholder="Uang Bayar" oninput="hitungKembalian()">
+
+<div class="kembali">
+Kembalian: Rp <span id="kembali">0</span>
+</div>
+
 </div>
 
 <script>
 let total = 0;
 
-function updateHarga(){
-  let barang = document.getElementById("barang");
-  let harga = barang.value;
-  document.getElementById("harga").value = harga;
-}
+/* DATA BARANG */
+let barang = [
+  {nama:"Indomie", harga:3000},
+  {nama:"Supermie", harga:3200},
+  {nama:"Popmie", harga:5000},
+  {nama:"Beras", harga:13000},
+  {nama:"Masako", harga:1500},
+  {nama:"Ladaku", harga:2000},
+  {nama:"Minyak 1/2 Kg", harga:8000},
+  {nama:"Minyak 1 Kg", harga:15000},
+  {nama:"Milo", harga:3500}
+];
 
-function tambah(){
-  let barang = document.getElementById("barang");
-  let nama = barang.options[barang.selectedIndex].text;
-  let harga = parseInt(document.getElementById("harga").value);
-  let jumlah = parseInt(document.getElementById("jumlah").value);
+let produk = document.getElementById("produk");
 
-  if(!nama || !harga || !jumlah){
-    alert("Isi semua dulu!");
-    return;
-  }
+/* TAMPILKAN PRODUK */
+barang.forEach((b,i)=>{
+  let div = document.createElement("div");
+  div.className = "card";
+  div.innerHTML = `
+    <b>${b.nama}</b><br>
+    Rp ${b.harga}
+  `;
+  div.onclick = ()=> tambah(i);
+  produk.appendChild(div);
+});
 
-  let subtotal = harga * jumlah;
-  total += subtotal;
+/* TAMBAH */
+function tambah(i){
+  let b = barang[i];
+  total += b.harga;
 
   document.getElementById("total").innerText = total;
+  hitungKembalian();
 
   let div = document.createElement("div");
   div.className = "item";
 
   div.innerHTML = `
-    ${nama} x${jumlah} = Rp ${subtotal}
-    <button onclick="hapus(this, ${subtotal})" style="background:red;">X</button>
+    ${b.nama} - Rp ${b.harga}
+    <button onclick="hapus(this, ${b.harga})">X</button>
   `;
 
   document.getElementById("list").appendChild(div);
 }
 
-function hapus(btn, subtotal){
-  total -= subtotal;
+/* HAPUS */
+function hapus(btn,harga){
+  total -= harga;
   document.getElementById("total").innerText = total;
+  hitungKembalian();
   btn.parentElement.remove();
+}
+
+/* KEMBALIAN */
+function hitungKembalian(){
+  let bayar = parseInt(document.getElementById("bayar").value) || 0;
+  let kembali = bayar - total;
+
+  document.getElementById("kembali").innerText =
+    kembali < 0 ? "Kurang!" : kembali;
 }
 </script>
 
